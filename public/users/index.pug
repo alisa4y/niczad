@@ -1,0 +1,56 @@
+extends ../../tools/layout.pug
+block link
+  link(rel="stylesheet" href="./index.css")
+block main
+  .title: h1 کاربران
+  .users.label
+    +inp("search", "جستجو...", "search")
+    table
+      thead(data-item="user-record")
+        tr 
+          th
+            span نام کاربری
+            include ../../icons/updown.svg
+          th 
+            span سطح دسترسی
+            include ../../icons/updown.svg
+          th
+      tbody
+        tr
+          td(data-key="username") علی
+          td(data-key="auth") صفری
+          td
+            +editBtn
+            +removeBtn
+    +addBtn
+  
+  template(id="user-record")
+    td(data-key="username")
+    td(data-key="auth")
+    td
+      +editBtn
+      +removeBtn
+
+block dialogAdd_title
+  h1 ثبت کاربر جدید
+  
+block dialogAdd_content
+  +userInfo("/users/add")
+
+block dialogEdit_title
+  h1 ویرایش اطلاعات کاربر
+
+block dialogEdit_content
+  +userInfo("/users/update")
+
+
+mixin userInfo(url)
+  form(action=url, method=method)
+    +inp("text", "نام کاربری", "username")
+    +inp("password", "رمز عبور", "password")
+    select(data-key="auth")
+      option(value="") سطح دسترسی
+      option(value="admin") ادمین
+      option(value="standard") عادی
+    +inp("password", "تایید رمز عبور", "")
+  

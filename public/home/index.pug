@@ -1,0 +1,13 @@
+extends ../../tools/layout.pug
+block link
+  link(rel="stylesheet" href="./index.css")
+block main
+  div.layout
+    div.g2c
+      div.intro
+        h2 سامانه مدیریت رزرواسیون هلیوم
+        p به راحتی مشتریان خود را وارد کنید و سفارشات آن ها را دریافت کنید و در نمایشی تمیر و مرتب آن هارا سامان دهی و مرتب کنید
+        +inp("text", "نام کاربری", "username")
+        +inp("password", "رمز عبور", "password")
+        +btn("ورود")
+      div: img(src="images/h5.jpg")

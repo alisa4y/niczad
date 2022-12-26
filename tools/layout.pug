@@ -1,0 +1,70 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(http-equiv="X-UA-Compatible", content="IE=edge")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title niczad
+    link(rel="stylesheet" href="index.css")
+    block link
+  body 
+    include ./components.pug
+    header
+      ul.flat.layout
+        li: a(href="/home") صفحه اصلی
+        li: a(href="/orders") سفارشات
+        li: a(href="/customers") مشتریان 
+        li: a(href="/users") کاربران
+        li.space
+        li
+          include ../icons/signout.svg
+      .title
+        block title
+    main.bg
+      .warn(data-content="")
+        .message
+        include ../icons/close.svg
+      .dialog.add
+        .title
+          block dialogAdd_title
+          include ../icons/close.svg
+        .content
+          block dialogAdd_content
+          .actions
+            button.btn.accept ایجاد
+            button.btn.back برگشت
+        .sync
+      .dialog.edit
+        .title
+          block dialogEdit_title
+          include ../icons/close.svg
+        .content
+          block dialogEdit_content
+          .actions
+            button.btn.accept ویرایش
+            button.btn.back برگشت
+        .sync
+      block main
+    footer.center
+      ul.flat.layout
+        div
+          include ../icons/copyright.svg
+        div: span کپی رایت 2023 - 2022
+        div: span تمامی حقوق  محفوظ است.
+        div.space
+        div: span ساخته شده توسط علی صفری
+        div 
+          span
+            include ../icons/telephone.svg
+          span 09385472962
+        div
+          include ../icons/whatsapp.svg
+        div
+          include ../icons/telegram.svg
+        div
+          include ../icons/instagram.svg
+        div
+          include ../icons/github.svg
+        div
+          include ../icons/gmail.svg
+    script(src="./index.js")

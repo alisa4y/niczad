@@ -1,0 +1,29 @@
+- var genId = 0;
+mixin inp(type, label, key)
+  div.field
+    input(type=type, data-key=key, required, id=genId)
+    label(for=genId)= label
+    div(class=`icon ${type}`)
+      case type
+        when "text"
+          include ../icons/close.svg
+        when "search"
+          include ../icons/searchText.svg
+        when "password"
+          include ../icons/eye.svg
+          include ../icons/closedEye.svg
+    .line
+    - genId++
+
+mixin btn(content, className="A")
+  button(class=`btn ${className}`)= content
+
+mixin addBtn
+  button.iconBtn.add
+    include ../icons/plus.svg
+mixin removeBtn
+  button.iconBtn.remove(data-item-remove)
+    include ../icons/remove.svg
+mixin editBtn
+  button.iconBtn.edit(data-item-edit)
+    include ../icons/edit.svg

@@ -1,0 +1,32 @@
+{
+  "name": "niczad",
+  "version": "1.0.0",
+  "description": "a customer time management service for miss niczad",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx run",
+    "build": "tsc ",
+    "build:watch": "tsc --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "ali safari",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/js-cookie": "^3.0.2",
+    "@types/jsonwebtoken": "^8.5.9",
+    "@types/node": "^18.11.9",
+    "@types/uuid": "^8.3.4",
+    "typescript": "^4.9.3"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "ez-server": "file:../../web/server",
+    "js-cookie": "^3.0.1",
+    "jsonwebtoken": "^8.5.1",
+    "jss": "file:../../web/jss",
+    "neo4j-driver": "^5.2.0",
+    "pug-ez-server": "file:../../web/pug server plugin",
+    "uuid": "^9.0.0"
+  }
+}
