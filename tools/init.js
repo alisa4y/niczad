@@ -6,8 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.init = void 0;
 const js_cookie_1 = __importDefault(require("js-cookie"));
 const jss_1 = require("jss");
+const flowco_1 = require("flowco");
 function init() {
     const paths = ["/home", "/orders", "/customers", "/users"];
+    const actions = new Map();
     (0, jss_1.ael)(window, "load", () => {
         const p = window.location.pathname;
         const navs = (0, jss_1.qsa)("header > ul > li");
@@ -24,9 +26,9 @@ function init() {
             document.body.setAttribute("data-token", "");
         }
         const [list, addDialog, editdialog] = (0, jss_1.mqs)("[data-item]", ".dialog.add", ".dialog.edit", document.body);
-        addDialog.end = () => {
+        actions.set(addDialog, () => {
             list.eval.push(addDialog.eval);
-        };
+        });
         fetch(p + "/getAll").then(async (res) => {
             if (res.ok) {
                 const data = await res.json();
@@ -106,16 +108,40 @@ function init() {
                 });
             },
             "[data-item-add]": elm => {
-                showDialog(addDialog, elm);
+                (0, jss_1.ael)(elm, "click", () => {
+                    showDialog(addDialog);
+                });
             },
             "[data-item-edit]": elm => {
                 const child = (0, jss_1.findAncestors)("[data-item]", elm).at(-2);
-                editdialog.end = () => {
-                    child.eval = editdialog.eval;
-                };
+                (0, jss_1.ael)(elm, "click", () => {
+                    actions.set(editdialog, () => {
+                        child.eval = editdialog.eval;
+                    });
+                    showDialog(editdialog);
+                });
+            },
+            "[data-item-remove]": elm => {
+                const child = (0, jss_1.findAncestors)("[data-item]", elm).at(-2);
+                (0, jss_1.ael)(elm, "click", () => {
+                    fetch(p + "/remove", {
+                        method: "POST",
+                        body: JSON.stringify({ id: child.eval.id }),
+                    });
+                    child.remove();
+                });
             },
             "[data-key='search']": elm => {
-                // TODO: general search rule
+                (0, jss_1.ael)(elm, "keyup", (0, flowco_1.debounce)(() => {
+                    const value = elm.value;
+                    if (value === "")
+                        for (const child of list.children)
+                            child.classList.remove("n");
+                    list.eval.forEach((v, i) => {
+                        if (JSON.stringify(v).includes(value))
+                            list.children[i].classList.add("n");
+                    });
+                }, 500));
             },
         });
         const warnElm = (0, jss_1.qs)(".warn");
@@ -146,9 +172,7 @@ function syncFactory(elm) {
         },
     ];
 }
-function showDialog(form, elm) {
-    (0, jss_1.ael)(elm, "click", () => {
-        form.classList.add("show");
-    });
+function showDialog(dialog) {
+    dialog.classList.add("show");
 }
 //# sourceMappingURL=init.js.map

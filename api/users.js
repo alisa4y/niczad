@@ -27,7 +27,7 @@ async function ifAuthorized(x, then) {
             return messages.loginPlease;
         }
         else if (user.auth === "admin") {
-            return then();
+            return await then();
         }
         else {
             x.statusCode = 403;
@@ -45,8 +45,9 @@ function getToken({ req }) {
 }
 function add(u, x) {
     return ifAuthorized(x, async () => {
-        await (0, db_1.query)(`create (n:User ${JSON.stringify({ ...u, id: (0, uuid_1.v4)() })})`, "WRITE");
-        return messages.addedNewUser;
+        const id = (0, uuid_1.v4)();
+        await (0, db_1.query)(`create (n:User ${JSON.stringify({ ...u, id })})`, "WRITE");
+        return { id, message: messages.addedNewUser };
     });
 }
 exports.add = add;

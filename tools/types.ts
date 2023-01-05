@@ -5,6 +5,7 @@ export type Place = {
   address: string
 }
 export type Customer = {
+  id: string
   name: string
   phone: string[]
   place?: Place
@@ -22,6 +23,7 @@ export type Reservation = {
 }
 // count, duration, location, type
 export type Order = {
+  id: string
   customer: Customer
   reservation: Reservation
   date: Date

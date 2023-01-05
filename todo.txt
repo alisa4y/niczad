@@ -4,3 +4,4 @@ there is block to fill the forms with desired inputs
 -- create general rules to get url from action attribute and method then try to fetch
 -- handle the failure by showing and 
 -- handle the success by showing a message and go back
+

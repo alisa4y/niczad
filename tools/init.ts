@@ -1,10 +1,11 @@
 import Cookies from "js-cookie"
 import { ael, qs, qsa, jss, findAncestors, ma, mqs } from "jss"
-import { XElement } from "jss/dist/types"
+import { Fn, XElement } from "jss/dist/types"
+import { debounce } from "flowco"
 
 export function init() {
   const paths = ["/home", "/orders", "/customers", "/users"]
-
+  let editAction: Fn
   ael(window, "load", () => {
     const p = window.location.pathname
     const navs = qsa("header > ul > li")
@@ -26,9 +27,18 @@ export function init() {
       ".dialog.edit",
       document.body
     )
-    ;(addDialog as any).end = () => {
-      list.eval.push(addDialog.eval)
-    }
+    fetchForm(addDialog).then(({ res, form, syncSuccess }) => {
+      res.json().then(({ id, message }) => {
+        list.eval.push({ ...form.eval, id })
+        syncSuccess(message)
+        onFormSubmitted(addDialog, form)
+      })
+    })
+    fetchForm(editdialog).then(async ({ res, form, syncSuccess }) => {
+      syncSuccess(await res.text())
+      editAction()
+      onFormSubmitted(editdialog, form)
+    })
     fetch(p + "/getAll").then(async res => {
       if (res.ok) {
         const data = await res.json()
@@ -75,31 +85,6 @@ export function init() {
           hideDialog(elm)
         })
       },
-      "button.btn.accept": elm => {
-        const form = findAncestors("form", elm).pop() as XElement
-        const [url, method = "POST"] = ma("action", "method", form)
-        const [syncSuccess, syncError] = syncFactory(qs(".sync", form))
-        ael(elm, "click", () => {
-          fetch(url, {
-            method,
-            body: JSON.stringify(form.eval),
-          })
-            .then(async res => {
-              if (res.ok) {
-                syncSuccess("انجام شد")
-                setTimeout(() => {
-                  submitForm(form)
-                }, 500)
-              } else {
-                syncError(await res.text())
-              }
-            })
-            .catch(e => {
-              syncError("خطا در ارتباط")
-              console.error(e)
-            })
-        })
-      },
       "button.btn.back": elm => {
         const dialog = findAncestors(".dialog", elm).pop() as XElement
         ael(elm, "click", () => {
@@ -107,28 +92,52 @@ export function init() {
         })
       },
       "[data-item-add]": elm => {
-        showDialog(addDialog, elm)
+        ael(elm, "click", () => {
+          showDialog(addDialog)
+        })
       },
       "[data-item-edit]": elm => {
         const child = findAncestors("[data-item]", elm).at(-2) as XElement
-        ;(editdialog as any).end = () => {
-          child.eval = editdialog.eval
-        }
+        ael(elm, "click", () => {
+          editAction = () => {
+            child.eval = editdialog.eval
+          }
+          showDialog(editdialog)
+        })
+      },
+      "[data-item-remove]": elm => {
+        const child = findAncestors("[data-item]", elm).at(-2) as XElement
+        ael(elm, "click", () => {
+          fetch(p + "/remove", {
+            method: "POST",
+            body: JSON.stringify({ id: child.eval.id }),
+          })
+          child.remove()
+        })
       },
       "[data-key='search']": elm => {
-        // TODO: general search rule
+        ael(
+          elm,
+          "keyup",
+          debounce(() => {
+            const value = (elm as any as HTMLInputElement).value
+            if (value === "")
+              for (const child of list.children) child.classList.remove("n")
+            list.eval.forEach((v, i) => {
+              if (JSON.stringify(v).includes(value))
+                list.children[i].classList.add("n")
+            })
+          }, 500)
+        )
       },
     })
-
     const warnElm = qs(".warn")
     ael(window, "click", () => {
       warnElm.setAttribute("data-const", "")
     })
   })
 }
-function submitForm(elm: XElement) {
-  ;(submitForm as any).end()
-  hideDialog(findAncestors(".dialog", elm).pop())
+function clearForm(elm: XElement) {
   qsa("[data-key]", elm).forEach((inp: HTMLInputElement) => (inp.value = ""))
 }
 function hideDialog(elm: XElement) {
@@ -146,8 +155,36 @@ function syncFactory(elm: Element) {
     },
   ]
 }
-function showDialog(form: XElement, elm: XElement) {
-  ael(elm, "click", () => {
-    form.classList.add("show")
-  })
+function showDialog(dialog: XElement) {
+  dialog.classList.add("show")
+}
+function fetchForm(dialog: XElement) {
+  const form = qs("form", dialog) as XElement
+  const [url, method = "POST"] = ma("action", "method", form)
+  const [syncSuccess, syncError] = syncFactory(qs(".sync", form))
+  return new Promise(resolve => {
+    ael(qs("button.btn.accept", dialog), "click", () => {
+      fetch(url, {
+        method,
+        body: JSON.stringify(form.eval),
+      })
+        .then(async res => {
+          if (res.ok) {
+            resolve({ res, form, syncSuccess })
+          } else {
+            syncError(await res.text())
+          }
+        })
+        .catch(e => {
+          syncError("خطا در ارتباط")
+          console.error(e)
+        })
+    })
+  }) as Promise<{ res: Response; form: XElement; syncSuccess: Fn }>
+}
+function onFormSubmitted(dialog: XElement, form: XElement) {
+  setTimeout(() => {
+    hideDialog(dialog)
+    clearForm(form)
+  }, 500)
 }

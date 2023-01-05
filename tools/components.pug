@@ -19,7 +19,7 @@ mixin btn(content, className="A")
   button(class=`btn ${className}`)= content
 
 mixin addBtn
-  button.iconBtn.add
+  button.iconBtn.add(data-item-add)
     include ../icons/plus.svg
 mixin removeBtn
   button.iconBtn.remove(data-item-remove)

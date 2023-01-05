@@ -16,7 +16,10 @@ const messages = {
   failedLogin: "نام کاربری یا رمز عبور اشتباه است",
 }
 type Fn = (...args: any[]) => any
-export async function ifAuthorized(x: XParam, then: Fn) {
+export async function ifAuthorized<T extends Fn>(
+  x: XParam,
+  then: T
+): Promise<string | Awaited<ReturnType<T>>> {
   const token = getToken(x)
   if (token) {
     const id = jwt.verify(token, process.env.SECRET_KEY)
@@ -27,7 +30,7 @@ export async function ifAuthorized(x: XParam, then: Fn) {
       x.statusCode = 401
       return messages.loginPlease
     } else if (user.auth === "admin") {
-      return then()
+      return await then()
     } else {
       x.statusCode = 403
       return messages.notAuthorized
@@ -42,11 +45,9 @@ function getToken({ req }: XParam) {
 }
 export function add(u: Omit<User, "id">, x: XParam) {
   return ifAuthorized(x, async () => {
-    await query(
-      `create (n:User ${JSON.stringify({ ...u, id: uuidv4() })})`,
-      "WRITE"
-    )
-    return messages.addedNewUser
+    const id = uuidv4()
+    await query(`create (n:User ${JSON.stringify({ ...u, id })})`, "WRITE")
+    return { id, message: messages.addedNewUser }
   })
 }
 export function remove(u: { id: string }, x: XParam) {
@@ -63,7 +64,7 @@ export function update(u: User, x: XParam) {
 }
 export async function getAll() {
   const r = await query("match(n:User) return n", "READ")
-  return r.records.map(n => n.get("n").properties)
+  return r.records.map(n => n.get("n").properties) as User[]
 }
 
 interface LoginData {
