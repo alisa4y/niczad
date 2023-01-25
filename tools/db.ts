@@ -1,40 +1,31 @@
-import neo4j, { QueryResult } from "neo4j-driver"
+import { access, readFile, writeFile } from "fs/promises"
+import { Customer, Order, User } from "./types"
 
-const driver = neo4j.driver(
-  "neo4j://localhost:7687",
-  neo4j.auth.basic("neo4j", "1234")
-)
-export function query(
-  q: string,
-  mode: keyof typeof neo4j.session,
-  params?: Record<string, any>
-): Promise<QueryResult> {
-  const session = driver.session({
-    defaultAccessMode: neo4j.session[mode],
-  })
-  return new Promise(async resolve => {
-    const result = await session.run(q, params)
-    resolve(result)
-    session.close()
-  })
+export const db: { users: User[]; customers: Customer[]; orders: Order[] } = {
+  users: [{ username: "niczad", password: "1234", auth: "admin", id: "0" }],
+  customers: [],
+  orders: [],
 }
-//------------- initializing ----------------
-;(async function init() {
-  await query(
-    `CREATE CONSTRAINT uniqueId IF NOT EXISTS
-  FOR (n:User)
-  REQUIRE n.id IS UNIQUE`,
-    "WRITE"
-  )
-  await query(
-    `CREATE CONSTRAINT notNullId IF NOT EXISTS
-  FOR (n:User)
-  REQUIRE n.id IS NOT NULL`,
-    "WRITE"
-  )
-})()
+const dbPath = "./db.json"
+function save() {
+  return writeFile(dbPath, JSON.stringify(db), "utf-8")
+}
+async function readDb() {
+  Object.assign(JSON.parse(await readFile(dbPath, "utf-8")))
+}
+setInterval(() => {
+  save()
+}, 15 * 60 * 1000)
 
-const closeDriver = () => {
-  driver.close()
+async function init() {
+  try {
+    await access(dbPath)
+    await readDb()
+  } catch (e) {
+    if (e.code === "ENOENT") {
+      save()
+    }
+    throw e
+  }
 }
-process.on("exit", closeDriver)
+init()

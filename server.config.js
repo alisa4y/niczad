@@ -7,7 +7,8 @@ module.exports = {
   publicDir: "public",
   defaultFile: "home",
   watch: true,
-  skipExtensions: [".ts"], // skip watching files with these extensions
+  apiExtension: ".ts", // .ts .js
+  skipExtensions: [], // skip watching files with these extensions
   reloadExtRgx: /^(?:(?!\.css).)+$/, // server won't send reload signal for css files
   plugins: {
     ".pug": pugPlugin,

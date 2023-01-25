@@ -1,0 +1,105 @@
+extends ../../tools/layout.pug
+block link
+  link(rel="stylesheet" href="./index.css")
+block main
+  .title: h1 سفارشات
+  .orders.head
+    .search
+      include ../../icons/search.svg
+    .daysScroller
+      .days(data-item="date")
+      //- .icon
+      //-   include ../../icons/rightArrow.svg
+      //- .icon
+      //-   include ../../icons/leftArrow.svg
+    template(id="date")
+      span(data-key="value")
+      .n(data-key="date")
+  .orders.label
+    .order-head
+      div 10:00
+      div: include ../../icons/3dots.svg
+      div 12:00
+      div: include ../../icons/3dots.svg
+      div 2:00
+      div: include ../../icons/3dots.svg
+      div 4:00
+      div: include ../../icons/3dots.svg
+      div 6:00
+      div: include ../../icons/3dots.svg
+      div 8:00
+      div: include ../../icons/3dots.svg
+      div 10:00
+      div: include ../../icons/3dots.svg
+    .order-table
+      .order-label(data-item="order-label")
+    +addBtn
+  
+  template(id="order-label")
+    div.clock
+      div(data-key="startTime")
+      div(data-key="endTime")
+    div(data-key="location")
+    div
+      span(data-key="count")
+      span  نفر 
+    div(data-key="gender")
+    div
+      div(data-key="name")
+      div(data-key="placeName")
+    div
+      +editBtn
+      +removeBtn
+    div.n(data-key="id")
+
+block dialogAdd_title
+  h1 ثبت سفارش جدید
+  
+block dialogAdd_content
+  +orderForm("/orders/add")
+
+block dialogEdit_title
+  h1 ویرایش سفارش
+
+block dialogEdit_content
+  +orderForm("/orders/update")
+
+block dialogShow_title
+  h1  اطلاعات مشتری
+
+block dialogShow_content
+  div(data-key="name")
+  div(data-key="placeName")
+  div(data-key="location")
+  div(data-key="count")
+  div(data-key="date")
+  div(data-key="duration")
+  div(data-key="gender")
+  div(data-key="type")
+  div(data-key="pricePerPerson")
+  div(data-key="discount")
+  div(data-key="note")
+  
+mixin phone(key)
+  .phone
+    +inp("number", "شماره تلفن", "value")
+    +addBtn
+    .phones(data-key=key, data-item="phone-edit")
+
+mixin orderForm(url)
+  form(action=url, method="POST").order
+    select(data-key="customerId")
+    .n(data-key="name")
+    .n(data-key="placeName")
+    +inp("text", "مکان", "location")
+    +inp("number", "تعداد", "count")
+    +inp("date", "تاریخ", "date")
+    +inp("text", "زمان شروع", "startTime")
+    .n(data-key="endTime")
+    +inp("text", "مدت زمان", "duration")
+    +inp("text", "جنسیت", "gender")
+    +inp("text", "نوع رزرو", "type")
+    +inp("text", "قیمت هر نفر", "pricePerPerson")
+    +inp("text", "تخفیف", "discount")
+    +inp("text", "یادداشت", "note")
+    .n(data-key="id")

@@ -1,0 +1,124 @@
+.orders.head {
+  display: flex;
+}
+.search {
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+.days {
+  display: flex;
+  overflow-x: scroll;
+  height: 200px;
+  width: 100%;
+  align-items: center;
+  cursor: grab;
+}
+.days > div:first-child {
+  margin-right: 0rem;
+}
+.days > div {
+  background: #ffaaaa;
+  white-space: nowrap;
+  margin: 1rem;
+  padding: 0.5rem;
+  transform: rotate(-70deg);
+  font-size: 1.2rem;
+  margin-right: -4rem;
+  min-width: 130px;
+  height: min-content;
+  cursor: pointer;
+}
+.days > div.selected,
+.days > div:hover {
+  transform: rotate(-70deg) scale(1.2);
+  box-shadow: 0 0 10px 4px gray;
+}
+.bg:before {
+  margin-top: 12rem;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.days::-webkit-scrollbar {
+  /* display: none; */
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.days {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+} /* Hide scrollbar for Chrome, Safari and Opera */
+.days::-webkit-scrollbar {
+  /* display: none; */
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.days {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.orders.label {
+  background: unset;
+  box-shadow: unset;
+  display: flex;
+  gap: 4rem;
+}
+.orders.label > .add {
+  position: absolute;
+  bottom: 4rem;
+  left: 4rem;
+  transform: scale(1.5);
+}
+.order-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  width: min-content;
+}
+.order-head > div {
+  display: grid;
+  place-items: center;
+}
+.order-label > div {
+  background-color: #feebd6;
+  display: flex;
+  justify-content: space-between;
+  gap: 3rem;
+  position: absolute;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 15px;
+  padding: 0.5rem 2rem;
+  white-space: nowrap;
+  align-items: center;
+}
+.order-label > div > .clock {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-image: url("/images/verticalLine.svg");
+}
+.order-label > div:nth-child(2n) .clock > div,
+.order-label > div:nth-child(2n) {
+  background-color: #ffe2e2;
+}
+.order-label > div .clock > div {
+  background-color: #feebd6;
+}
+.order-table {
+  position: relative;
+  text-align: center;
+}
+.daysScroller {
+  position: relative;
+  width: 80%;
+  margin-right: 2rem;
+}
+.daysScroller > .icon {
+  position: absolute;
+  top: 2rem;
+  right: -3rem;
+}
+.daysScroller > .icon:nth-child(3) {
+  right: unset;
+  left: -3rem;
+}

@@ -1,0 +1,85 @@
+extends ../../tools/layout.pug
+block link
+  link(rel="stylesheet" href="./index.css")
+block main
+  .title: h1 مشتریان
+  .customers.label
+    +inp("search", "جستجو...", "search")
+    table
+      thead
+        tr 
+          th
+            span نام
+            include ../../icons/updown.svg
+          th 
+            span شماره همراه
+            include ../../icons/updown.svg
+          th 
+            span از مکان
+            include ../../icons/updown.svg
+          th
+      tbody(data-item="customer-record")
+        
+    +addBtn
+  
+  template(id="customer-record")
+    td(data-key="name")
+    td(data-key="phone" data-item="phone-record")
+    td(data-key="place.name")
+    td
+      +editBtn
+      +removeBtn
+    td.n(data-key="id")
+
+  template(id="phone-record")
+    div(data-key="value")
+  template(id="phone-edit")
+    div(data-key="value")
+    +removeBtn
+
+
+block dialogAdd_title
+  h1 ثبت مشتری جدید
+  
+block dialogAdd_content
+  +userInfo("/customers/add")
+
+block dialogEdit_title
+  h1 ویرایش اطلاعات مشتری
+
+block dialogEdit_content
+  +userInfo("/customers/update")
+
+block dialogShow_title
+  h1  اطلاعات مشتری
+
+block dialogShow_content
+  div(data-key="name")
+  div(data-key="phone", data-item="phone-record")
+  div(data-branch="place")
+    div(data-key="name")
+    div(data-key="type")
+    div(data-key="phone", data-item="phone-record")
+    div(data-key="address")
+
+
+mixin phone(key)
+  .phone
+    +inp("number", "شماره تلفن")
+    +addBtn
+    .phones(data-key=key, data-item="phone-edit")
+
+mixin userInfo(url)
+  form(action=url, method="POST")
+    +inp("text", "نام مشتری", "name")
+    +phone("phone")
+    label
+      span اضافه کردن مکان
+      checkbox
+    .place(data-branch="place")
+      +inp("text", "نام مکان", "name")
+      +inp("text", "نوع", "type")
+      +phone("phone")
+      +inp("text", "آدرس...", "address")
+
+    .n(data-key="id")

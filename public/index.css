@@ -25,6 +25,7 @@ header {
   background: #fffafa;
   box-shadow: 0 0 7px 1px gray;
   width: 100%;
+  z-index: 10;
 }
 li {
   list-style-type: none;
@@ -57,7 +58,7 @@ header li.space {
   border-bottom: 2px solid #ffb9b9;
 }
 main {
-  min-height: 600px;
+  min-height: 800px;
   overflow: hidden;
   position: relative;
 }
@@ -151,18 +152,24 @@ input[type="text"] ~ .icon.password > *:nth-child(2) {
 .btn.A {
   background: #f0616d;
 }
+.btn.accept {
+  background: #00dbdb;
+}
+.btn.back {
+  background: #f0616d;
+}
 .n {
-  display: none;
+  display: none !important;
 }
-.warn[data-content=""] {
-  display: none;
+.dialog.response:not([data-content=""]) {
+  opacity: 1;
+  z-index: 1;
 }
-.warn svg path {
+.dialog.response svg path {
   stroke: #620000;
 }
-.warn,
 .dialog {
-  padding: 4em;
+  padding: 0.5rem 2em;
   border-radius: 20px;
   background: #fefde6;
   position: fixed;
@@ -174,11 +181,17 @@ input[type="text"] ~ .icon.password > *:nth-child(2) {
   z-index: -1;
   opacity: 0;
 }
-.warn > svg {
-  position: absolute;
-  top: 1em;
-  left: 1em;
+.title svg path {
   stroke: #620000;
+}
+.title {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid gray;
+  padding: 1rem;
+}
+.dialog > .content {
+  margin-top: 2rem;
 }
 header > ul > li:last-child {
   display: none !important;
@@ -202,10 +215,74 @@ main > .title > * {
   margin: auto;
 }
 .label {
-  background: #FEEBD6;
+  background: #feebd6;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   border-radius: 25px;
-  padding: .5em 2em;
+  padding: 0.5em 2em;
   margin: 2em;
   width: var(--dw);
 }
+.phone {
+  display: flex;
+}
+.phones > div {
+  display: flex;
+  border-radius: 20px;
+  padding: 0.5rem;
+  box-shadow: 0 0 10px black;
+  margin: 1rem;
+}
+
+.bg:before {
+  content: "";
+  width: 100vw;
+  height: 95vh;
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  background-image: url("/images/bg_bggenerator_com_1.png");
+  background-position: center;
+}
+.bg::after {
+  content: "";
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  background: hsl(0deg 100% 98% / 50%);
+}
+main table {
+  background: rgba(255, 255, 255, 0.37);
+  border-radius: 15px;
+  min-width: 500px;
+}
+main table > thead {
+  background: #ffb9b9;
+  width: 500px;
+  border-radius: 100px;
+}
+main table > thead > tr {
+  border-radius: 100px;
+}
+main table > thead th {
+  padding: 0.5em;
+}
+main table > tbody > tr {
+  background: rgba(197, 197, 197, 0.15);
+}
+main table > tbody > tr:nth-child(2n + 1) {
+  background: rgba(255, 255, 255, 0.54);
+}
+main table > tbody td {
+  padding-right: 2em;
+}
+main table > tbody td:last-child {
+  padding-right: 0em;
+}
+.users button.add {
+  margin-right: 450px;
+}
+/* main table > * > tr > *:last-child {
+  display: none !important;
+} */

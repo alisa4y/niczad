@@ -6,7 +6,7 @@ block main
   .users.label
     +inp("search", "جستجو...", "search")
     table
-      thead(data-item="user-record")
+      thead
         tr 
           th
             span نام کاربری
@@ -15,13 +15,7 @@ block main
             span سطح دسترسی
             include ../../icons/updown.svg
           th
-      tbody
-        tr
-          td(data-key="username") علی
-          td(data-key="auth") صفری
-          td
-            +editBtn
-            +removeBtn
+      tbody(data-item="user-record")
     +addBtn
   
   template(id="user-record")
@@ -30,6 +24,7 @@ block main
     td
       +editBtn
       +removeBtn
+    td.n(data-key="id")
 
 block dialogAdd_title
   h1 ثبت کاربر جدید
@@ -44,12 +39,23 @@ block dialogEdit_content
   +userInfo("/users/update")
 
 
+block dialogShow_title
+  h1 اطلاعات کاربر
+block dialogShow_content
+  div
+    span نام کاربری:
+    span(data-key="username")
+  div
+    span سطح دسترسی:
+    span(data-key="auth")
+
 mixin userInfo(url)
-  form(action=url, method=method)
+  form(action=url, method="POST")
     +inp("text", "نام کاربری", "username")
     +inp("password", "رمز عبور", "password")
     select(data-key="auth")
       option(value="") سطح دسترسی
       option(value="admin") ادمین
       option(value="standard") عادی
-    +inp("password", "تایید رمز عبور", "")
+    +inp("password", "تایید رمز عبور")
+    .n(data-key="id")

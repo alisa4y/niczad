@@ -1,20 +1,22 @@
+type Phone = { value: string }[]
 export type Place = {
+  id: string
   name: string
   type: string
-  phones: string[]
+  phone: Phone
   address: string
 }
 export type Customer = {
   id: string
   name: string
-  phone: string[]
+  phone: Phone
   place?: Place
 }
 export type Reservation = {
-  count: number
-  duration: number
-  date: Date
   location: string
+  count: number
+  date: Date
+  duration: number
   gender: string
   type: string
   pricePerPerson: number
@@ -24,9 +26,19 @@ export type Reservation = {
 // count, duration, location, type
 export type Order = {
   id: string
-  customer: Customer
+  customerId: string
+  customer: string
   reservation: Reservation
-  date: Date
+  location: string
+  count: number
+  startTime: string
+  date: string
+  duration: number
+  gender: string
+  type: string
+  pricePerPerson: number
+  discount: number
+  note: string
 }
 export type User = {
   id: string

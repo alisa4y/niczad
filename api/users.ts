@@ -1,5 +1,5 @@
 import { User } from "../tools/types"
-import { query } from "../tools/db"
+import { db } from "../tools/db"
 import { v4 as uuidv4 } from "uuid"
 import { XParam } from "ez-server"
 import jwt from "jsonwebtoken"
@@ -10,9 +10,9 @@ config()
 const messages = {
   loginPlease: "لطفا وارد شوید",
   notAuthorized: "شما اجازه این کار را ندارید",
-  addedNewUser: "کاربر جدید اضافه شد",
-  removedUser: "کابر حذف شد",
-  updatedUser: "تغییرات کاربر انجام شد",
+  add: "کاربر جدید اضافه شد",
+  remove: "کابر حذف شد",
+  update: "تغییرات کاربر انجام شد",
   failedLogin: "نام کاربری یا رمز عبور اشتباه است",
 }
 type Fn = (...args: any[]) => any
@@ -21,21 +21,24 @@ export async function ifAuthorized<T extends Fn>(
   then: T
 ): Promise<string | Awaited<ReturnType<T>>> {
   const token = getToken(x)
-  if (token) {
-    const id = jwt.verify(token, process.env.SECRET_KEY)
-    const user = (
-      await query(`match (n:User {id:${id}})`, "READ")
-    ).records[0]?.get("n").properties
-    if (user === null) {
+  try {
+    if (token) {
+      const { id } = jwt.verify(token, process.env.SECRET_KEY) as { id: string }
+      const user = db.users.find(u => u.id === id)
+      if (user === undefined) {
+        x.statusCode = 401
+        return messages.loginPlease
+      } else if (user.auth === "admin") {
+        return await then()
+      } else {
+        x.statusCode = 403
+        return messages.notAuthorized
+      }
+    } else {
       x.statusCode = 401
       return messages.loginPlease
-    } else if (user.auth === "admin") {
-      return await then()
-    } else {
-      x.statusCode = 403
-      return messages.notAuthorized
     }
-  } else {
+  } catch (e) {
     x.statusCode = 401
     return messages.loginPlease
   }
@@ -43,41 +46,20 @@ export async function ifAuthorized<T extends Fn>(
 function getToken({ req }: XParam) {
   return req.headers["authorization"]?.split(" ")[1]
 }
-export function add(u: Omit<User, "id">, x: XParam) {
-  return ifAuthorized(x, async () => {
-    const id = uuidv4()
-    await query(`create (n:User ${JSON.stringify({ ...u, id })})`, "WRITE")
-    return { id, message: messages.addedNewUser }
-  })
-}
-export function remove(u: { id: string }, x: XParam) {
-  return ifAuthorized(x, async () => {
-    await query(`match (n:User {id: $id}) delete n`, "WRITE", u)
-    return messages.removedUser
-  })
-}
-export function update(u: User, x: XParam) {
-  return ifAuthorized(x, async () => {
-    await query(`merge (n:User ${JSON.stringify(u)} )`, "WRITE", u)
-    return messages.updatedUser
-  })
-}
-export async function getAll() {
-  const r = await query("match(n:User) return n", "READ")
-  return r.records.map(n => n.get("n").properties) as User[]
-}
-
 interface LoginData {
   username: string
   password: string
 }
-export async function login(data: LoginData, x: XParam) {
+type LoginRet = { username: string; auth: User["auth"]; token: string }
+export async function login(
+  data: LoginData,
+  x: XParam
+): Promise<string | LoginRet> {
   try {
-    const user = await query(
-      "match (n:User {username:$username, password:$password}) return n",
-      "READ",
-      data
-    ).then(r => r.records[0]?.get("n").properties)
+    const user = db.users.find(
+      ({ username, password }) =>
+        username === data.username && password === data.password
+    )
     if (user) {
       const { username, auth, id } = user
       return { username, auth, token: jwt.sign({ id }, process.env.SECRET_KEY) }
@@ -89,4 +71,46 @@ export async function login(data: LoginData, x: XParam) {
     x.statusCode = 500
     return e.message
   }
+}
+
+export function generateApi(
+  field: keyof typeof db,
+  messages: Record<"add" | "remove" | "update", string>
+) {
+  return {
+    add(u: any, x: XParam) {
+      return ifAuthorized(x, async () => {
+        const id = uuidv4()
+        db[field].push({ ...u, id } as any)
+        return { id, message: messages.add }
+      })
+    },
+    remove(u: { id: string }, x: XParam) {
+      return ifAuthorized(x, async () => {
+        const index = db[field].findIndex((o: any) => o.id === u.id)
+        if (index !== -1) db[field].splice(index, 1)
+        return messages.remove
+      })
+    },
+    update(u: any, x: XParam) {
+      return ifAuthorized(x, async () => {
+        const record = (db[field] as any[]).find((o: any) => o.id === u.id)
+        if (record) Object.assign(record, u)
+        return messages.update
+      })
+    },
+    getAll() {
+      return db[field]
+    },
+  }
+}
+export const { add, remove, update, getAll } = generateApi("users", messages)
+
+export function resetDB(): null {
+  Object.assign(db, {
+    users: [{ username: "niczad", password: "1234", auth: "admin", id: "0" }],
+    customers: [],
+    orders: [],
+  })
+  return null
 }

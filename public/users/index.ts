@@ -1,2 +1,3 @@
-import { init } from "../../tools/init"
+import { init, initList } from "../../tools/init"
 init()
+initList()

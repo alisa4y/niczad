@@ -7,7 +7,7 @@
     "start": "npx run",
     "build": "tsc ",
     "build:watch": "tsc --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx cypress open"
   },
   "keywords": [],
   "author": "ali safari",
@@ -17,17 +17,20 @@
     "@types/jsonwebtoken": "^8.5.9",
     "@types/node": "^18.11.9",
     "@types/uuid": "^8.3.4",
+    "cypress": "^12.3.0",
+    "ts-node": "^10.9.1",
     "typescript": "^4.9.3"
   },
   "dependencies": {
+    "bafu": "file:../js-functional",
     "dotenv": "^16.0.3",
     "ez-server": "file:../../web/server",
     "flowco": "file:../../web/js-logic",
     "js-cookie": "^3.0.1",
-    "jsonwebtoken": "^8.5.1",
-    "jss": "file:../../web/jss",
-    "neo4j-driver": "^5.2.0",
-    "pug-ez-server": "file:../../web/pug server plugin",
-    "uuid": "^9.0.0"
+    "jsonwebtoken": "^9.0.0",
+    "jss": "file:../jss",
+    "pug-ez-server": "file:../pug-ez-server",
+    "uuid": "^9.0.0",
+    "x-bundler": "file:../js-bundler"
   }
 }

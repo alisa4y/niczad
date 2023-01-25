@@ -5,7 +5,6 @@ import { debounce } from "flowco"
 
 export function init() {
   const paths = ["/home", "/orders", "/customers", "/users"]
-  let editAction: Fn
   ael(window, "load", () => {
     const p = window.location.pathname
     const navs = qsa("header > ul > li")
@@ -20,33 +19,9 @@ export function init() {
     })
     if (Cookies.get("token")) {
       document.body.setAttribute("data-token", "")
+      qs("header > ul > li:nth-child(1)").classList.add("n")
     }
-    const [list, addDialog, editdialog] = mqs(
-      "[data-item]",
-      ".dialog.add",
-      ".dialog.edit",
-      document.body
-    )
-    fetchForm(addDialog).then(({ res, form, syncSuccess }) => {
-      res.json().then(({ id, message }) => {
-        list.eval.push({ ...form.eval, id })
-        syncSuccess(message)
-        onFormSubmitted(addDialog, form)
-      })
-    })
-    fetchForm(editdialog).then(async ({ res, form, syncSuccess }) => {
-      syncSuccess(await res.text())
-      editAction()
-      onFormSubmitted(editdialog, form)
-    })
-    fetch(p + "/getAll").then(async res => {
-      if (res.ok) {
-        const data = await res.json()
-        list.eval = data
-      } else {
-        qs(".warn").setAttribute("data-content", await res.text())
-      }
-    })
+
     jss({
       ".icon.password > *:nth-child(1)": elm => {
         const inp = qs("input", elm.parentElement.parentElement)
@@ -70,13 +45,13 @@ export function init() {
           inp.focus()
         })
       },
-      ".warn": elm => {
+      ".dialog.response": elm => {
         const close = qs("svg", elm)
         ael(close, "click", () => {
           elm.dataset.content = ""
         })
       },
-      ".warn:not([data-content=''])": elm => {
+      ".dialog.response:not([data-content=''])": elm => {
         qs(".message", elm).textContent = elm.dataset.content
       },
       ".dialog": elm => {
@@ -91,54 +66,119 @@ export function init() {
           hideDialog(dialog)
         })
       },
-      "[data-item-add]": elm => {
-        ael(elm, "click", () => {
-          showDialog(addDialog)
-        })
-      },
-      "[data-item-edit]": elm => {
-        const child = findAncestors("[data-item]", elm).at(-2) as XElement
-        ael(elm, "click", () => {
-          editAction = () => {
-            child.eval = editdialog.eval
-          }
-          showDialog(editdialog)
-        })
-      },
-      "[data-item-remove]": elm => {
-        const child = findAncestors("[data-item]", elm).at(-2) as XElement
-        ael(elm, "click", () => {
-          fetch(p + "/remove", {
-            method: "POST",
-            body: JSON.stringify({ id: child.eval.id }),
-          })
-          child.remove()
-        })
-      },
-      "[data-key='search']": elm => {
-        ael(
-          elm,
-          "keyup",
-          debounce(() => {
-            const value = (elm as any as HTMLInputElement).value
-            if (value === "")
-              for (const child of list.children) child.classList.remove("n")
-            list.eval.forEach((v, i) => {
-              if (JSON.stringify(v).includes(value))
-                list.children[i].classList.add("n")
-            })
-          }, 500)
-        )
-      },
     })
-    const warnElm = qs(".warn")
+    const resElm = qs(".dialog.response")
     ael(window, "click", () => {
-      warnElm.setAttribute("data-const", "")
+      resElm.setAttribute("data-content", "")
     })
   })
 }
+export function initList() {
+  let editAction: Fn
+  const p = window.location.pathname
+  const [list, addDialog, editDialog, watchDialog, resElm] = mqs(
+    "main .label [data-item]",
+    ".dialog.add",
+    ".dialog.edit",
+    ".dialog.watch",
+    ".dialog.response",
+    document.body
+  )
+  let listData: any[] = []
+  fetchForm(addDialog, (res, syncSuccess) => {
+    res.json().then(({ id, message }) => {
+      listData.push({ ...addDialog.eval, id })
+      list.eval.push({ ...addDialog.eval, id })
+      syncSuccess(message)
+      onFormSubmitted(addDialog)
+    })
+  })
+  fetchForm(editDialog, async (res, syncSuccess) => {
+    syncSuccess(await res.text())
+    editAction()
+    onFormSubmitted(editDialog)
+  })
+  fetch(p + "/getAll").then(async res => {
+    if (res.ok) {
+      listData = await res.json()
+      if (!p.startsWith("/order")) list.eval = listData
+    } else {
+      resElm.setAttribute("data-content", await res.text())
+    }
+  })
+  jss({
+    "[data-item-add]": elm => {
+      ael(elm, "click", () => {
+        showDialog(addDialog)
+      })
+    },
+    "main .label [data-item-edit]": elm => {
+      const child = findAncestors("[data-item]", elm).at(-2) as XElement
+      ael(elm, "click", e => {
+        e.stopImmediatePropagation()
+        editDialog.eval.id = child.eval.id
+        const item = listData.find(v => v.id === child.eval.id)
+        editDialog.eval = item
+        editAction = () => {
+          Object.assign(item, editDialog.eval)
+          child.eval = item
+        }
+        showDialog(editDialog)
+      })
+    },
+    "main .label [data-item-remove]": elm => {
+      const child = findAncestors("[data-item]", elm).at(-2) as XElement
+      ael(elm, "click", e => {
+        e.stopImmediatePropagation()
+        fetch(p + "/remove", {
+          method: "POST",
+          body: JSON.stringify({ id: child.eval.id }),
+          headers: {
+            authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        }).then(async res => {
+          if (res.ok) {
+            child.remove()
+          } else {
+            resElm.setAttribute("data-content", await res.text())
+          }
+        })
+      })
+    },
+    ".dialog [data-item-remove]": elm => {
+      ael(elm, "click", () => {
+        const child = findAncestors("[data-item]", elm).at(-2) as XElement
+        child.remove()
+      })
+    },
+    "main [data-key='search']": elm => {
+      ael(
+        elm,
+        "keyup",
+        debounce(() => {
+          const value = (elm as any as HTMLInputElement).value
+          if (value === "")
+            for (const child of list.children) child.classList.remove("n")
+          else
+            list.eval.forEach((v: object, i: number) => {
+              if (!JSON.stringify(v).includes(value))
+                list.children[i].classList.add("n")
+            })
+        }, 500)
+      )
+    },
+    "main .label > * > [data-item] > *": elm => {
+      const item = listData.find(({ id }) => id === elm.eval.id)
+      ael(elm, "click", e => {
+        watchDialog.eval = item
+        showDialog(watchDialog)
+      })
+    },
+  })
+}
 function clearForm(elm: XElement) {
-  qsa("[data-key]", elm).forEach((inp: HTMLInputElement) => (inp.value = ""))
+  qsa("input", elm).forEach((inp: HTMLInputElement) => (inp.value = ""))
+  qsa("[data-item]", elm).forEach((inp: XElement) => (inp.eval = []))
 }
 function hideDialog(elm: XElement) {
   elm.classList.remove("show")
@@ -158,33 +198,39 @@ function syncFactory(elm: Element) {
 function showDialog(dialog: XElement) {
   dialog.classList.add("show")
 }
-function fetchForm(dialog: XElement) {
+type ActionHandle = (res: Response, sync: (msg: string) => void) => void
+function fetchForm(dialog: XElement, handle: ActionHandle) {
   const form = qs("form", dialog) as XElement
   const [url, method = "POST"] = ma("action", "method", form)
-  const [syncSuccess, syncError] = syncFactory(qs(".sync", form))
-  return new Promise(resolve => {
-    ael(qs("button.btn.accept", dialog), "click", () => {
-      fetch(url, {
-        method,
-        body: JSON.stringify(form.eval),
-      })
-        .then(async res => {
-          if (res.ok) {
-            resolve({ res, form, syncSuccess })
-          } else {
-            syncError(await res.text())
-          }
-        })
-        .catch(e => {
-          syncError("خطا در ارتباط")
-          console.error(e)
-        })
+  const [syncError, syncSuccess] = syncFactory(qs(".sync", dialog))
+  ael(qs("button.btn.accept", dialog), "click", () => {
+    fetch(url, {
+      method,
+      body: JSON.stringify(form.eval),
+      headers: {
+        Authorization: `Bearer ${Cookies.get("token")}`,
+      },
     })
-  }) as Promise<{ res: Response; form: XElement; syncSuccess: Fn }>
+      .then(async res => {
+        if (res.ok) {
+          handle(res, syncSuccess)
+        } else {
+          syncError(await res.text())
+        }
+      })
+      .catch(e => {
+        syncError("خطا در ارتباط")
+        console.error(e)
+      })
+  })
 }
-function onFormSubmitted(dialog: XElement, form: XElement) {
+function onFormSubmitted(dialog: XElement) {
   setTimeout(() => {
     hideDialog(dialog)
-    clearForm(form)
-  }, 500)
+    clearForm(dialog)
+  }, 10)
+}
+export function resMessage(msg: { message: string }, dialog: XElement) {
+  dialog.eval = msg
+  showDialog(dialog)
 }

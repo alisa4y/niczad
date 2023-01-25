@@ -1,7 +1,10 @@
 - var genId = 0;
-mixin inp(type, label, key)
+mixin inp(type, label, key, value)
   div.field
-    input(type=type, data-key=key, required, id=genId)
+    if key 
+      input(type=type, data-key=key, required, id=genId, value=value)
+    else
+      input(type=type, required, id=genId, value=value)
     label(for=genId)= label
     div(class=`icon ${type}`)
       case type
@@ -16,7 +19,7 @@ mixin inp(type, label, key)
     - genId++
 
 mixin btn(content, className="A")
-  button(class=`btn ${className}`)= content
+  button(type="submit",class=`btn ${className}`)=content
 
 mixin addBtn
   button.iconBtn.add(data-item-add)

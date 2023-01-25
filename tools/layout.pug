@@ -18,12 +18,11 @@ html(lang="en")
         li.space
         li
           include ../icons/signout.svg
-      .title
-        block title
     main.bg
-      .warn(data-content="")
-        .message
-        include ../icons/close.svg
+      .dialog.response(data-content)
+        .title
+          include ../icons/close.svg
+        .message(data-key="message")
       .dialog.add
         .title
           block dialogAdd_title
@@ -44,6 +43,12 @@ html(lang="en")
             button.btn.accept ویرایش
             button.btn.back برگشت
         .sync
+      .dialog.watch
+        .title
+          block dialogShow_title
+          include ../icons/close.svg
+        .content
+          block dialogShow_content
       block main
     footer.center
       ul.flat.layout
@@ -57,14 +62,14 @@ html(lang="en")
           span
             include ../icons/telephone.svg
           span 09385472962
-        div
+        a
           include ../icons/whatsapp.svg
-        div
+        a
           include ../icons/telegram.svg
-        div
+        a
           include ../icons/instagram.svg
-        div
+        a
           include ../icons/github.svg
-        div
+        a
           include ../icons/gmail.svg
-    script(src="./index.js")
+    script(src="./index.ts")
