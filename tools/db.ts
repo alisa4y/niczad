@@ -11,7 +11,7 @@ function save() {
   return writeFile(dbPath, JSON.stringify(db), "utf-8")
 }
 async function readDb() {
-  Object.assign(JSON.parse(await readFile(dbPath, "utf-8")))
+  Object.assign(db, JSON.parse(await readFile(dbPath, "utf-8")))
 }
 setInterval(() => {
   save()

@@ -1,7 +1,7 @@
 import Cookies from "js-cookie"
 import { ael, qs, qsa, jss, findAncestors, ma, mqs } from "jss"
 import { Fn, XElement } from "jss/dist/types"
-import { debounce } from "flowco"
+import { debounce } from "vaco"
 
 export function init() {
   const paths = ["/home", "/orders", "/customers", "/users"]

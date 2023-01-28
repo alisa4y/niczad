@@ -14,7 +14,7 @@ type Clock = {
 
 ael(window, "load", e => {
   let orders: Order[] = []
-  getAll({ method: "GET" })
+  getAll()
     .then(r => r.json())
     .then(r => {
       orders = r as Order[]

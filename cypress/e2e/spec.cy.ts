@@ -261,7 +261,7 @@ describe("customers", () => {
     })
   })
 })
-describe.only("orders", () => {
+describe("orders", () => {
   const today = formatDate(new Date(Date.now()))
   const tommorow = "2023-01-26"
   const orders = [

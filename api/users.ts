@@ -1,7 +1,7 @@
-import { User } from "../tools/types"
 import { db } from "../tools/db"
+import { User } from "../tools/types"
 import { v4 as uuidv4 } from "uuid"
-import { XParam } from "ez-server"
+import { XParam } from "ultimate-server"
 import jwt from "jsonwebtoken"
 import { config } from "dotenv"
 
@@ -72,7 +72,6 @@ export async function login(
     return e.message
   }
 }
-
 export function generateApi(
   field: keyof typeof db,
   messages: Record<"add" | "remove" | "update", string>
