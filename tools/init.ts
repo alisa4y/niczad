@@ -1,7 +1,7 @@
 import Cookies from "js-cookie"
-import { ael, qs, qsa, jss, findAncestors, ma, mqs } from "jss"
-import { Fn, XElement } from "jss/dist/types"
-import { debounce } from "vaco"
+import { ael, qs, qsa, qsr, findAncestors, ma, mqs } from "qs-rule"
+import { Fn, XElement } from "qs-rule/dist/types"
+import { clone, debounce } from "vaco"
 
 export function init() {
   const paths = ["/home", "/orders", "/customers", "/users"]
@@ -22,24 +22,30 @@ export function init() {
       qs("header > ul > li:nth-child(1)").classList.add("n")
     }
 
-    jss({
+    qsr({
       ".icon.password > *:nth-child(1)": elm => {
-        const inp = qs("input", elm.parentElement.parentElement)
+        const inp = qs(
+          "input",
+          elm.parentElement.parentElement
+        ) as unknown as HTMLInputElement
         elm.addEventListener("click", () => {
-          ;(inp as HTMLInputElement).type = "text"
+          inp.type = "text"
         })
       },
       ".icon.password > *:nth-child(2)": elm => {
-        const inp = qs("input", elm.parentElement.parentElement)
+        const inp = qs(
+          "input",
+          elm.parentElement.parentElement
+        ) as unknown as HTMLInputElement
         elm.addEventListener("click", () => {
-          ;(inp as HTMLInputElement).type = "password"
+          inp.type = "password"
         })
       },
       ".icon.text > *:nth-child(1)": elm => {
         const inp = qs(
           "input",
           elm.parentElement.parentElement
-        ) as HTMLInputElement
+        ) as unknown as HTMLInputElement
         elm.addEventListener("click", () => {
           inp.value = ""
           inp.focus()
@@ -87,8 +93,9 @@ export function initList() {
   let listData: any[] = []
   fetchForm(addDialog, (res, syncSuccess) => {
     res.json().then(({ id, message }) => {
-      listData.push({ ...addDialog.eval, id })
-      list.eval.push({ ...addDialog.eval, id })
+      const item = clone({ ...addDialog.eval, id })
+      listData.push(item)
+      list.eval.push(item)
       syncSuccess(message)
       onFormSubmitted(addDialog)
     })
@@ -106,7 +113,7 @@ export function initList() {
       resElm.setAttribute("data-content", await res.text())
     }
   })
-  jss({
+  qsr({
     "[data-item-add]": elm => {
       ael(elm, "click", () => {
         showDialog(addDialog)
@@ -117,10 +124,11 @@ export function initList() {
       ael(elm, "click", e => {
         e.stopImmediatePropagation()
         editDialog.eval.id = child.eval.id
-        const item = listData.find(v => v.id === child.eval.id)
-        editDialog.eval = item
+        const itemIndex = listData.findIndex(v => v.id === child.eval.id)
+        editDialog.eval = listData[itemIndex]
         editAction = () => {
-          Object.assign(item, editDialog.eval)
+          const item = clone(editDialog.eval)
+          listData[itemIndex] = item
           child.eval = item
         }
         showDialog(editDialog)
@@ -179,6 +187,7 @@ export function initList() {
 function clearForm(elm: XElement) {
   qsa("input", elm).forEach((inp: HTMLInputElement) => (inp.value = ""))
   qsa("[data-item]", elm).forEach((inp: XElement) => (inp.eval = []))
+  qs(".sync", elm).innerHTML = ""
 }
 function hideDialog(elm: XElement) {
   elm.classList.remove("show")

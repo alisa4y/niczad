@@ -1,7 +1,7 @@
 import { db } from "../tools/db"
 import { User } from "../tools/types"
 import { v4 as uuidv4 } from "uuid"
-import { XParam } from "ultimate-server"
+import { XCon } from "ninja-server"
 import jwt from "jsonwebtoken"
 import { config } from "dotenv"
 
@@ -17,7 +17,7 @@ const messages = {
 }
 type Fn = (...args: any[]) => any
 export async function ifAuthorized<T extends Fn>(
-  x: XParam,
+  x: XCon,
   then: T
 ): Promise<string | Awaited<ReturnType<T>>> {
   const token = getToken(x)
@@ -43,8 +43,8 @@ export async function ifAuthorized<T extends Fn>(
     return messages.loginPlease
   }
 }
-function getToken({ req }: XParam) {
-  return req.headers["authorization"]?.split(" ")[1]
+function getToken({ request }: XCon) {
+  return request.headers["authorization"]?.split(" ")[1]
 }
 interface LoginData {
   username: string
@@ -53,7 +53,7 @@ interface LoginData {
 type LoginRet = { username: string; auth: User["auth"]; token: string }
 export async function login(
   data: LoginData,
-  x: XParam
+  x: XCon
 ): Promise<string | LoginRet> {
   try {
     const user = db.users.find(
@@ -77,21 +77,21 @@ export function generateApi(
   messages: Record<"add" | "remove" | "update", string>
 ) {
   return {
-    add(u: any, x: XParam) {
+    add(u: any, x: XCon) {
       return ifAuthorized(x, async () => {
         const id = uuidv4()
         db[field].push({ ...u, id } as any)
         return { id, message: messages.add }
       })
     },
-    remove(u: { id: string }, x: XParam) {
+    remove(u: { id: string }, x: XCon) {
       return ifAuthorized(x, async () => {
         const index = db[field].findIndex((o: any) => o.id === u.id)
         if (index !== -1) db[field].splice(index, 1)
         return messages.remove
       })
     },
-    update(u: any, x: XParam) {
+    update(u: any, x: XCon) {
       return ifAuthorized(x, async () => {
         const record = (db[field] as any[]).find((o: any) => o.id === u.id)
         if (record) Object.assign(record, u)

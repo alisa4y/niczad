@@ -1,5 +1,5 @@
-import { ael, jss, mqs, qs, qsa } from "jss"
-import { XElement } from "jss/dist/types"
+import { ael, qsr, mqs, qs, qsa } from "qs-rule"
+import { XElement } from "qs-rule/dist/types"
 import { getAll as getAllCustomers } from "../../clientApi/customers"
 import { getAll } from "../../clientApi/orders"
 import { init, initList } from "../../tools/init"
@@ -14,41 +14,37 @@ type Clock = {
 
 ael(window, "load", e => {
   let orders: Order[] = []
-  getAll()
-    .then(r => r.json())
-    .then(r => {
-      orders = r as Order[]
-      const selected = qs(".days .selected") as XElement
-      const find = orders.find(({ date }) => {
-        let od = new Date(date)
-        return od.getTime() === parseInt(selected.eval.date)
-      })
-      if (find) {
-        table.eval = [find]
-      }
+  getAll().then(r => {
+    orders = r as Order[]
+    const selected = qs(".days .selected") as XElement
+    const find = orders.find(({ date }) => {
+      let od = new Date(date)
+      return od.getTime() === parseInt(selected.eval.date)
     })
-  getAllCustomers({ method: "GET" })
-    .then(r => r.json())
-    .then(customers => {
-      qsa("select[data-key='customerId']").forEach(elm => {
-        elm.innerHTML =
-          "<option>مشتری انتخاب کنید</option>" +
-          customers
-            .map(c => `<option value="${c.id}">${(c as any).name}</option>`)
-            .join("\n")
-        ael(elm, "change", e => {
-          const v = (e.target as HTMLInputElement).value
-          const [name, placeName] = mqs(
-            "[data-key='name']",
-            "[data-key='placeName']",
-            elm.parentElement
-          )
-          const cus = (customers as any[]).find(({ id }) => id === v)
-          name.textContent = cus.name || ""
-          placeName.textContent = cus.place?.name || ""
-        })
+    if (find) {
+      table.eval = [find]
+    }
+  })
+  getAllCustomers({ method: "GET" }).then(customers => {
+    qsa("select[data-key='customerId']").forEach(elm => {
+      elm.innerHTML =
+        "<option>مشتری انتخاب کنید</option>" +
+        customers
+          .map(c => `<option value="${c.id}">${(c as any).name}</option>`)
+          .join("\n")
+      ael(elm, "change", e => {
+        const v = (e.target as HTMLInputElement).value
+        const [name, placeName] = mqs(
+          "[data-key='name']",
+          "[data-key='placeName']",
+          elm.parentElement
+        )
+        const cus = (customers as any[]).find(({ id }) => id === v)
+        name.textContent = cus.name || ""
+        placeName.textContent = cus.place?.name || ""
       })
     })
+  })
   qsa("form input[data-key='duration']").forEach(elm => {
     const startTime = qs(
       "[data-key='startTime']",
@@ -57,7 +53,7 @@ ael(window, "load", e => {
     const endTime = qs("[data-key='endTime']", elm.parentElement.parentElement)
     ael(elm, "change", e => {
       const v = (e.target as HTMLInputElement).value
-      const s = (startTime as HTMLInputElement).value
+      const s = (startTime as unknown as HTMLInputElement).value
       const [hour, minute = 0] = s.split(":").map(t => parseInt(t))
       let [hour2, minute2 = 0] = v.split(":").map(t => parseInt(t))
       let m = minute + minute2
@@ -75,7 +71,7 @@ ael(window, "load", e => {
     document.querySelector("main")
   )
   const ppm = getPPM(head as any as HTMLElement)
-  jss({
+  qsr({
     ".days": elm => {
       const today = new Date(Date.now())
       today.setHours(3, 30, 0, 0)

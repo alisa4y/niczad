@@ -1,55 +1,39 @@
 import * as __oApi from "../api/customers"
 
-    export function add (data:Parameters<typeof __oApi.add>[0], options:RequestInit={}) {
-  type ObjRetType = Extract<Awaited<ReturnType<typeof __oApi.add>>, Record<any, any>>
-  type RetType =  ObjRetType extends never 
-    ? Omit<Response, "json"> & {
-      json: () => Promise<never>
-    }
-    : Omit<Response, "json"> & {
-        json: () => Promise<ObjRetType>
-      }
+    export const add = function (data:Parameters<typeof __oApi["add"]>[0], options:RequestInit={}) {
+  type ObjRetType = Extract<Awaited<ReturnType<typeof __oApi["add"]>>, Record<any, any>>
   return fetch("/customers/add"
     , {method: "POST",body: JSON.stringify(data),...options}
-    ) as Promise<RetType>
+  ).then(async res => {
+    if (res.ok) return await res.json() as ObjRetType
+    else throw new Error(await res.text())
+  })
 }
-export function remove (data:Parameters<typeof __oApi.remove>[0], options:RequestInit={}) {
-  type ObjRetType = Extract<Awaited<ReturnType<typeof __oApi.remove>>, Record<any, any>>
-  type RetType =  ObjRetType extends never 
-    ? Omit<Response, "json"> & {
-      json: () => Promise<never>
-    }
-    : Omit<Response, "json"> & {
-        json: () => Promise<ObjRetType>
-      }
+export const remove = function (data:Parameters<typeof __oApi["remove"]>[0], options:RequestInit={}) {
+  type ObjRetType = Extract<Awaited<ReturnType<typeof __oApi["remove"]>>, Record<any, any>>
   return fetch("/customers/remove"
     , {method: "POST",body: JSON.stringify(data),...options}
-    ) as Promise<RetType>
+  ).then(async res => {
+    if (res.ok) return await res.json() as ObjRetType
+    else throw new Error(await res.text())
+  })
 }
-export function update (data:Parameters<typeof __oApi.update>[0], options:RequestInit={}) {
-  type ObjRetType = Extract<Awaited<ReturnType<typeof __oApi.update>>, Record<any, any>>
-  type RetType =  ObjRetType extends never 
-    ? Omit<Response, "json"> & {
-      json: () => Promise<never>
-    }
-    : Omit<Response, "json"> & {
-        json: () => Promise<ObjRetType>
-      }
+export const update = function (data:Parameters<typeof __oApi["update"]>[0], options:RequestInit={}) {
+  type ObjRetType = Extract<Awaited<ReturnType<typeof __oApi["update"]>>, Record<any, any>>
   return fetch("/customers/update"
     , {method: "POST",body: JSON.stringify(data),...options}
-    ) as Promise<RetType>
+  ).then(async res => {
+    if (res.ok) return await res.json() as ObjRetType
+    else throw new Error(await res.text())
+  })
 }
-export function getAll (options:RequestInit={}) {
-  type ObjRetType = Extract<Awaited<ReturnType<typeof __oApi.getAll>>, Record<any, any>>
-  type RetType =  ObjRetType extends never 
-    ? Omit<Response, "json"> & {
-      json: () => Promise<never>
-    }
-    : Omit<Response, "json"> & {
-        json: () => Promise<ObjRetType>
-      }
+export const getAll = function (options:RequestInit={}) {
+  type ObjRetType = Extract<Awaited<ReturnType<typeof __oApi["getAll"]>>, Record<any, any>>
   return fetch("/customers/getAll"
     , options
-    ) as Promise<RetType>
+  ).then(async res => {
+    if (res.ok) return await res.json() as ObjRetType
+    else throw new Error(await res.text())
+  })
 }
   
